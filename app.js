@@ -12,15 +12,18 @@ const app = express();
 app.use(bodyParser.json());
 app.use(methodOverride('_method'));
 app.set('view engine','ejs');
+ //mongoose.connect('mongodb://admin:admin123@ds211504.mlab.com:11504/mlabdb', { useNewUrlParser: true })
 
-//mongo URI
+//const mongoURI = 'mongodb://admin:admin123@ds211504.mlab.com:11504/mlabdb'
 //const mongoURI='mongodb://localhost:27017/testing'
-const mongoURI = 'mongodb://arjun:arjun123@ds259253.mlab.com:59253/mongouploads'
-const conn = mongoose.createConnection("mongodb://arjun:arjun123@ds259253.mlab.com:59253/mongouploads", { useNewUrlParser: true })
+//mongodb://<dbuser>:<dbpassword>@ds259253.mlab.com:59253/mongouploads
+const mongoURI = 'mongodb://arjun1:arjun1@ds259253.mlab.com:59253/mongouploads'
+const conn =  mongoose.createConnection('mongodb://arjun1:arjun1@ds259253.mlab.com:59253/mongouploads', { useNewUrlParser: true })
 //create mongo connection
-//const conn = mongoose.createConnection(mongoURI);
+ 
+//const conn = mongoose.createConnection('mongodb://admin:admin123@ds211504.mlab.com:11504/mlabdb', { useNewUrlParser: true });
 
-//Init gfs
+// Init gfs
 let gfs;
 conn.once('open',function(){
     //Init stream
@@ -49,15 +52,40 @@ const storage = new GridFsStorage({
 const upload = multer({ storage });
 
 
+let schema = new mongoose.Schema({
+  name: {
+      type: String,
+      required: true,
+      minLength: 5
+  },
+  age: {
+      type: Number,
+      required: true
+  }
+})
+
+const ToDo = mongoose.model('ToDo', schema)
+
+app.post('/postData', (req, res) => {
+  let toDo = new ToDo({
+      name: req.body.name,
+      age: req.body.age
+  })
+
+  toDo.save().then((data) => {
+      res.send(data), (e) => res.send(e)
+  })
+})
+
+
 app.get('/',function(req,res){
-res.render('index');
+res.render(__dirname+'/views/index');
 });
 //post/uploads
 app.post('/uploads',upload.single('file'),function(req,res){
    // res.json({file:req.file}); 
     res.redirect('/')
    })
-
    // get/files
 
 app.get('/files',(req,res)=>{
@@ -99,7 +127,7 @@ gfs.files.findOne({filename:req.params.filename},(err,file)=>{
           err:'no file exists'
         });
       }
-      if(file.contentType === 'image/jpeg'|| file.contentType === 'img/png'){
+      if(file.contentType === 'image/jpeg'|| file.contentType === 'image/PNG'){
       //read output to browser
       const readstream = gfs.createReadStream(file.filename);
       readstream.pipe(res);
