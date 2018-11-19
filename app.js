@@ -12,17 +12,13 @@ const app = express();
 app.use(bodyParser.json());
 app.use(methodOverride('_method'));
 app.set('view engine','ejs');
-const port = process.env.PORT || 3000
 
-app.listen(port, () => {
-  console.log(`Here I am.... Rocking @ port  ${port}`)
-})
 //mongo URI
-// const mongoURI='mongodb://localhost:27017/testing'
-mongoose.connect("mongodb://arjun:arjun123@ds259253.mlab.com:59253/mongouploads", { useNewUrlParser: true })
-
+//const mongoURI='mongodb://localhost:27017/testing'
+const mongoURI = 'mongodb://arjun:arjun123@ds259253.mlab.com:59253/mongouploads'
+const conn = mongoose.createConnection("mongodb://arjun:arjun123@ds259253.mlab.com:59253/mongouploads", { useNewUrlParser: true })
 //create mongo connection
-// const conn=mongoose.createConnection(mongoURI);
+//const conn = mongoose.createConnection(mongoURI);
 
 //Init gfs
 let gfs;
@@ -116,6 +112,8 @@ gfs.files.findOne({filename:req.params.filename},(err,file)=>{
       }
     })
   })
-   
-const port = 5000;
-app.listen(port,()=>console.log('server started on port ${port}'));
+  const port = process.env.PORT || 8000
+  
+  app.listen(port, () => {
+    console.log(`Here I am.... Rocking @ port  ${port}`)
+  })
